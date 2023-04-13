@@ -1,0 +1,32 @@
+{
+    "children":[
+    {"name":"East Asia",
+        "children":[{"name":"China","value":117240.80,"colname":"level3"},
+                    {"name":"Japan","value":49331.97,"colname":"level3"},
+                    {"name":"South Korea","value":6090.60,"colname":"level3"}],
+    "colname":"level2"},
+    {"name":"Middle East",
+    "children":[{"name":"Saudi Arab","value":18839.31,"colname":"level3"},
+                {"name":"Algeria","value":10120.73,"colname":"level3"},
+                {"name":"Egypt", "value":7321.21, "colname":"level3"}],
+    "colname":"level2"},
+    {"name":"South East Asia",
+    "children":[{"name":"Thailand", "value":14237.94, "colname":"level3"},
+                {"name":"Singapore", "value":8965.37, "colname":"level3"},
+                {"name":"Indonesia", "value":4581.53, "colname":"level3"},
+                {"name":"Malaysia", "value":2267.19, "colname":"level3"}],
+    "colname":"level2"},
+    {"name":"Western Europe",
+    "children":[{"name":"United Kingdom", "group": "D", "value":18094.04,"colname":"level3"},
+                {"name":"France","group":"D","value":142096.43,"colname":"level3"},
+                {"name":"Germany","group":"D","value":195651.03,"colname":"level3"},
+                {"name":"Italy","group":"D","value":142976.10,"colname":"level3"}],
+    "colname":"level2"},
+    {"name":"Central and Eastern Europe",
+    "children":[{"name":"Turkey","group":"E","value":31594.46,"colname":"level3"},
+                {"name":"Russian","group":"E","value":134036.13,"colname":"level3"},
+                {"name":"Poland","group":"E","value":13334.44,"colname":"level3"}],
+    "colname":"level2"}
+
+]}
+    

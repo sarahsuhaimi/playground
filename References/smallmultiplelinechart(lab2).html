@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--Nur Sarah Mohamad Suhaimi 19000422-->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProjectDV</title>
+    <script src="https://d3js.org/d3.v4.js"></script>
+</head>
+<body>
+    <div id="my_dataviz"></div>
+
+    <script>
+        // space for graph
+        var margin = {top: 30, right: 25, bottom: 35, left: 50},
+        width = 300 - margin.left - margin.right,
+        height = 300 - margin.top - margin.bottom;
+
+        // parse the date/time 
+        var parseTime = d3.timeParse("%Y");
+
+        d3.csv("https://raw.githubusercontent.com/sarahsuhaimi/playground/main/Malaysian%20Graduates%20Dataset%20(2017-2021).csv",
+        function(data){
+            console.log(data)
+            data.forEach(function(d) { 
+                
+                d.Year = parseTime(d.Year);
+                d.AgeGroup = d.AgeGroup;
+                d.MeanMonthlyWages_Employed_RM = +d.MeanMonthlyWages_Employed_RM;
+            })
+
+            var sumstat = d3.nest()
+            .key(function(d) { return d.AgeGroup;})
+            .entries(data);
+
+            // Create list of groups
+            allKeys = sumstat.map(function(d){return d.key})
+            
+            var svg = d3.select("#my_dataviz")
+            .selectAll("uniqueChart")
+            .data(sumstat)
+            .enter()
+            .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+                .attr("transform",
+                    "translate(" + margin.left + "," + margin.top + ")");
+
+            // scale based on year use scaleTime()
+            var x = d3.scaleTime()
+                .domain(d3.extent(data, function(d) { return d.Year; }))
+                .range([ 0, width]);
+            svg
+            .append("g")
+            .attr("transform", `translate(0, ${height})`)
+            .call(d3.axisBottom(x).ticks(5));
+
+            //Add Y axis
+            var y = d3.scaleLinear()
+            .domain([0, d3.max(data, function(d) { return +d.MeanMonthlyWages_Employed_RM; })])
+            .range([ height, 0 ]);
+            svg.append("g")
+            .call(d3.axisLeft(y));
+
+            // color palette
+            var color = d3.scaleOrdinal()
+            .domain(allKeys)
+            .range(['red','RoyalBlue','green','BlueViolet'])
+
+            // Draw the line
+            svg
+            .append("path")
+                .attr("fill", "none")
+                .attr("stroke", function(d){ return color(d.key) })
+                .attr("stroke-width", 1.9)
+                .attr("d", function(d){
+                return d3.line()
+                    .x(function(d) { return x(d.Year); })
+                    .y(function(d) { return y(+d.MeanMonthlyWages_Employed_RM); })
+                    (d.values)
+                })
+
+            // Add titles
+            svg
+            .append("text")
+            .attr("text-anchor", "start")
+            .attr("y", -5)
+            .attr("x", 0)
+            .text(function(d){ return(d.key)})
+            .style("fill", function(d){ return color(d.key) })
+
+            // Add X axis label:
+            svg.append("text")
+                .attr("text-anchor", "end")
+                .attr("x", width + 25)
+                .attr("y", height + 35)
+                .text("Year");
+
+            // Add Y axis label:
+            svg.append("text")
+                .attr("text-anchor", "end")
+                .attr("transform", "rotate(-90)")
+                .attr("y", -margin.left + 10)
+                .attr("x", -margin.top + 30)
+                .text("Mean Monthly Wages (RM)")
+        });
+    </script>
+</body>
+</html>

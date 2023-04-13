@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Nur Sarah Binti Mohamad Suhaimi CS 19000422 -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>19000422-Lab 6</title>
+    <!-- Load d3.js --> 
+    <script src="https://d3js.org/d3.v2.js"></script>
+    <style type="text/css"> 
+ 
+        #pieChart {     
+            position:absolute; 
+            top:10px; 
+            left:10px; 
+            width:400px; 
+            height: 400px;  
+        } 
+
+        #lineChart {    
+            position:absolute;
+            top:15px;
+            left:410px;
+            height: 150px;
+        }
+ 
+        #barChart { 
+        position:absolute; 
+        top:160px; 
+        left:410px; 
+        height: 250px; 
+        } 
+
+        .slice { 
+        font-size: 12pt; 
+        font-family: Verdana; 
+        fill: white;  
+        font-weight: bold;  
+                }  
+
+        /*for line chart*/
+        .axis path, .axis line {
+            fill: none;
+            stroke: black;
+            shape-rendering: crispEdges; 
+            /* The shape-rendering property is an SVG attribute, 
+            used here to make sure our axis and its tick mark lines are pixel-perfect. */
+        }
+
+        .line {
+        fill: none;
+        /* stroke: steelblue; */
+        stroke-width: 3px;
+        }
+
+        .dot {
+        /* fill: white;
+        stroke: steelblue; */
+        stroke-width: 1.5px;
+        }
+ 
+        
+        .axis text { 
+            font-family: Verdana; 
+            font-size: 11px; 
+        } 
+ 
+        .title { 
+            font-family: Verdana; 
+            font-size: 20px;  
+                 
+        } 
+ 
+        .xAxis { 
+            font-family: verdana; 
+            font-size: 11px; 
+            fill: black; 
+        }   
+ 
+        .yAxis { 
+            font-family: verdana; 
+            font-size: 11px; 
+            fill: white; 
+        } 
+
+        table {
+            border-collapse:collapse;
+            border: 0px;	
+            font-family: Verdana;	
+            color: #5C5558;
+            font-size: 12px;
+            text-align: right;			
+        }
+
+        td {
+            padding-left: 15px;		
+        }
+
+        #lineChartTitle1 {
+            font-family: Verdana;
+            font-size  : 14px;
+            fill       : lightgrey;
+            font-weight: bold;
+            text-anchor: middle;
+        }
+
+        #lineChartTitle2 {
+            font-family: Verdana;
+            font-size  : 72px;
+            fill       : grey;
+            text-anchor: middle;
+            font-weight: bold;
+            /*font-style: italic;*/
+        }
+</style> 
+</head>
+<body>
+    <body> 
+        <div id="pieChart"></div> 
+        <div id="barChart"></div>   
+        <div id="lineChart"></div>
+        <script type="text/javascript" src="dashboard.js"></script> 
+    </body>
+</body>
+</html>

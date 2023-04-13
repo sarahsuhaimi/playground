@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- kena ada d3pie.min.js dlm folder yg sama -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProjectDV</title>
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://d3js.org/d3.v6.js"></script>
+    <script src="d3pie.min.js"></script>
+    
+</head>
+<body>
+    <div id = "pie"></div>
+    <script>
+        const parseTime = d3.timeParse("%Y");
+        d3.csv("https://raw.githubusercontent.com/sarahsuhaimi/playground/main/Malaysian%20Graduates%20Dataset%20(2017-2021).csv").then(function(data){
+            
+            data.forEach(function(d) { 
+                d.Year = parseTime(d.Year);
+                d.AgeGroup = d.AgeGroup;
+                d.NumberOfGraduates_k = +d.NumberOfGraduates_k;
+            })
+
+            // Sum up the values for each state
+            var new_data = d3.nest()
+            .key(function(d){ return d.AgeGroup;})
+            .rollup(function(g){
+                return { value: d3.sum(g, function(d){ return parseFloat(d.NumberOfGraduates_k);})}
+            })
+            .entries(data)
+            // pay attention to d.value etc
+            var pie = new d3pie("pie",{
+                header: {
+                title: {
+                    text: "Number of Graduates based on Age Group (2017-2021)"}
+                    },
+                data: {
+                    content: new_data.map(function(d) {
+                        return { label: d.key, value: d.value.value };
+                        })
+                    }
+            });
+
+        })
+    </script>
+</body>
+</html>

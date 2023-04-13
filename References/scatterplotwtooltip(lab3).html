@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--Nur Sarah Mohamad Suhaimi 19000422-->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- Load d3.js --> 
+    <script src="https://d3js.org/d3.v4.js"></script>
+</head>
+<body>
+    <div id="my_dataviz"></div>
+    <script>
+        const margin = {top: 30, right: 30, bottom: 30, left: 60}, 
+        width = 550 - margin.left - margin.right, 
+        height = 600 - margin.top - margin.bottom
+
+        const svg = d3.select("#my_dataviz") 
+        .append("svg") 
+        .attr("width", width + margin.left + margin.right) 
+        .attr("height", height + margin.top + margin.bottom) 
+        .append("g") 
+        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+        d3.csv("segmented_customers.csv",
+        function(data){
+
+             // x axis
+             var x = d3.scaleLinear() 
+                .domain(d3.extent(data, function(d) { return d.Age; })) 
+                .range([ 0, width ]); 
+            svg.append("g") 
+                .attr("transform", "translate(0," + height + ")") 
+                .call(d3.axisBottom(x));
+
+            // Add Y axis 
+            var y = d3.scaleLinear() 
+                .domain([0, d3.max(data, function(d){ return +d.Spending_Score})]) 
+                .range([ height, 0]); 
+            svg.append("g") 
+                .call(d3.axisLeft(y));
+
+            var tooltip = d3.select("#my_dataviz") 
+                .append("div") 
+                .style("opacity", 0) 
+                .attr("class", "tooltip") 
+                .style("background-color", "white") 
+                .style("border", "solid") 
+                .style("border-width", "2px") 
+                .style("border-radius", "5px") 
+                .style("padding", "10px") 
+                .style("position", "absolute")
+
+            var mouseover = function(d){ tooltip.style("opacity",1)}
+
+            var mousemove = function(d) { 
+                tooltip 
+                .html("The exact value of<br>the Spending Score is " + d.Spending_Score + "<br>on " + d.Age + " years old") 
+                .style("left", (d3.mouse(this)[0]+90) + "px")  
+                .style("top", (d3.mouse(this)[1]) + "px") 
+            }
+
+            var mouseleave = function(d) { 
+                tooltip 
+                .transition() 
+                .duration(200) 
+                .style("opacity", 0) 
+            }
+
+            svg.append('g') 
+                .selectAll("dot") 
+                .data(data.filter(function(d,i){return i < 50})) 
+                .enter() 
+                .append("circle") 
+                .attr("cx", function (d) { return x(d.Age); } ) 
+                .attr("cy", function (d) { return y(d.Spending_Score); } ) 
+                .attr("r", 10) 
+                .style("fill", " IndianRed")
+                .style("opacity",0.5)
+                .style("stroke","white")
+                .on("mouseover",mouseover)
+                .on("mousemove",mousemove)
+                .on("mouseleave", mouseleave)
+
+            // Add X axis label:
+            svg.append("text")
+                .attr("text-anchor", "end")
+                .attr("x", width + 30)
+                .attr("y", height + 27)
+                .text("Age");
+
+            // Y axis label:
+            svg.append("text")
+                .attr("text-anchor", "end")
+                .attr("transform", "rotate(-90)")
+                .attr("y", -margin.left + 20)
+                .attr("x", -margin.top + 50)
+                .text("Spending Score (1-100)")
+
+            // adding main title
+            svg.append("text")
+                .attr("x", (width/2))
+                .attr("y", 0 - (margin.top/2))
+                .attr("text-anchor", "middle")
+                .text("Age and Spending Score");
+
+        });
+    </script>
+    <h2>Summary:</h2>
+    <p>
+        &emsp;Based on the scatter plot above, the highest spending score is 99 which comes from 35 years old customers.<br>
+        &emsp;Meanwhile, the lowest spending score is 3 on 64 years old customers. In the graph, there is a cluster of young adult/adult (18-35 years old)<br>
+        &emsp;customers that has spending scores above 60. However, the spending score is depending when the age is increasing.<br>
+        &emsp;Therefore, we can conclude that the spending score and age have a negative relationship.
+    </p>
+</body>
+</html>

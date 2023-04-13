@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- Load d3.js --> 
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <style> 
+ 
+        body { 
+          font: 10px sans-serif; 
+        } 
+         
+        rect { 
+          stroke: #000; 
+        } 
+         
+        .svg { 
+          shape-rendering: crispEdges;
+        }
+
+        .label {
+            font: 13px sans-serif;
+            font-style: normal;
+        }
+         
+        </style>
+</head>
+<body>
+    <script>
+        var width = 1100, 
+            height = 500, 
+            margin = 35;
+
+        var x = d3.scaleLinear() 
+            .range([0, width - 6 * margin]); 
+ 
+        var y = d3.scaleLinear() 
+            .range([0, height - 2 * margin]); 
+        
+        var z = d3.scaleOrdinal(d3.schemeCategory10);
+
+        var n = d3.format(",d"), 
+            p = d3.format(".0%"); 
+
+        var svg = d3.select("body").append("svg") 
+            .attr("width", width) 
+            .attr("height", height) 
+        .append("g") 
+            .attr("transform", "translate(" + 2 * margin + "," + margin + ")");
+
+        d3.json("marimekko.json", function(data) { 
+
+            var offset = 0;
+            var segments = d3.nest() 
+                .key(function(d) { return d.segment; }) 
+                .entries(data); 
+
+            var sum = segments.reduce(function(v, p) { 
+                return (p.offset = v) + (p.sum = p.values.reduceRight(function(v, d) { 
+                d.parent = p; 
+                return (d.offset = v) + d.value; 
+                }, 0)); 
+            }, 0);
+            
+            var xtick = svg.selectAll(".x") 
+                .data(x.ticks(10)) 
+                .enter().append("g") 
+                .attr("class", "x") 
+                .attr("transform", function(d) {
+                    return "translate(" + x(d) + "," + y(1) 
+                + ")"; }); 
+            
+            xtick.append("line") 
+                .attr("y2", 6) 
+                .style("stroke", "#000"); 
+            
+            xtick.append("text") 
+                .attr("y", 8) 
+                .attr("text-anchor", "middle") 
+                .attr("dy", ".71em")
+                .text(p);
+
+            var ytick = svg.selectAll(".y") 
+                .data(y.ticks(10)) 
+                .enter().append("g") 
+                .attr("class", "y") 
+                .attr("transform", function(d) { return "translate(0," + y(1 - d) + ")"; 
+            }); 
+            
+            ytick.append("line") 
+                .attr("x1", -6) 
+                .style("stroke", "#000"); 
+            
+            ytick.append("text") 
+                .attr("x", -8) 
+                .attr("text-anchor", "end") 
+                .attr("dy", ".35em") 
+                .text(p);
+
+            var segments = svg.selectAll(".segment") 
+                .data(segments) 
+                .enter().append("g") 
+                .attr("class", "segment") 
+                .attr("xlink:title", function(d) { return d.key; }) 
+                .attr("transform", function(d) { return "translate(" + x(d.offset / sum) 
+            + ")"; });
+
+
+            svg.selectAll(".segment").append("text") 
+                .text(function (d) { 
+                    return d.key; 
+                }) // segment 
+                .attr("x", 5) 
+                .attr("y", function (d) { 
+                    return height - 40; 
+                }) 
+                .attr("class", "label"); 
+
+
+            svg.selectAll(".segment").append("text") 
+                .text(function (d) { 
+                    return (" Total: " + d.sum); 
+                }) // total 
+                .attr("x", 5) 
+                .attr("y", function (d) { 
+                    return -5;  
+                }) 
+                .attr("class", "label");
+
+            var markets = segments.selectAll(".market") 
+                .data(function(d) { return d.values; }) 
+                .enter().append("a") 
+                .attr("class", "market") 
+                .attr("xlink:title", function(d) { return d.market + " " + d.parent.key 
+                    + ": " + n(d.value); }) 
+                .append("rect") 
+                .attr("y", function(d) { return y(d.offset / d.parent.sum); }) 
+                .attr("height", function(d) { return y(d.value / d.parent.sum); }) 
+                .attr("width", function(d) { return x(d.parent.sum / sum); }) 
+                .style("fill", function(d) { return z(d.market); });
+
+            // Adding legend
+
+            // extract first column from json
+            var keys = data.map(item => item.market) 
+            // remove duplicate array 
+            var keys = keys.filter(function(elem, pos, arr) {
+                return arr.indexOf(elem) == pos;
+            });
+
+            var color = d3.scaleOrdinal()
+                .domain(keys)
+                .range(d3.schemeCategory10);
+
+            svg.selectAll("mydots")
+                .data(keys)
+                .enter()
+                .append("circle")
+                    .attr("cx", width - 170)
+                    .attr("cy", function(d,i){ return 10 + i*20})
+                    .attr("r", 7)
+                    .style("fill", function(d){ return color(d)})
+            
+            // // Add one dot in the legend for each name.
+            svg.selectAll("mylabels")
+                .data(keys)
+                .enter()
+                .append("text")
+                    .attr("x", width - 160)
+                    .attr("y", function(d,i){ return 10 + i*20})
+                    .style("fill", function(d){ return color(d)})
+                    .text(function(d){ return d})
+                    .attr("text-anchor", "left")
+                    .style("alignment-baseline", "middle")
+                .attr("class", "label")
+        })
+    </script>
+</body>
+</html>

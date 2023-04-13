@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- Nur Sarah Binti Mohamad Suhaimi 19000422 -->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab5</title>
+    <!-- Load d3.js -->
+    <script src="https://d3js.org/d3.v4.js"></script>
+    <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v2.min.js"></script>
+</head>
+<body>
+    <svg id="my_dataviz" width="1300" height="600"></svg>
+    <script>
+        var svg = d3.select("svg"),
+            width = +svg.attr("width"),
+            height = +svg.attr("height");
+
+        var path = d3.geoPath();
+        var projection = d3.geoMercator()
+                        .scale(80)
+                        .center([30,5])
+                        .translate([width / 2, height / 2]);
+
+        var data = d3.map();
+        // Values in .domain represents different colors in the map based on population
+        var colorScale = d3.scaleThreshold()
+                        .domain([10, 50, 100, 1000,  3000, 7000, 10000, 20000, 25000])
+                        .range(d3.schemeOranges[9]);
+
+        d3.queue()
+            .defer(d3.json, "https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson")
+            .defer(d3.csv, "https://raw.githubusercontent.com/sarahsuhaimi/playground/main/Monkey_Pox_Cases_Worldwide_edited.csv", function(d) { data.set(d.Country, +d.Confirmed_Cases); })
+            .await(ready);
+        
+        function ready(error, topo) {
+
+            var mouseover = function(d){
+
+                d3.selectAll('Country')
+                    .transition()
+                    .duration(200)
+                    .style('opacity', .5)
+
+                    d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .style('opacity', 1)
+                    .style('stroke','black')
+            }
+
+            var mouseleave = function(d){
+                
+                d3.selectAll('Country')
+                    .transition()
+                    .duration(200)
+                    .style('opacity', .8)
+
+                d3.select(this)
+                    .transition()
+                    .duration(200)
+                    .style('stroke','transparent')
+            }
+
+            // Draw the map
+            svg.append("g")
+                .selectAll("path")
+                .data(topo.features)
+                // console.log(topo)
+                .enter()
+                .append("path")
+                // draw each country
+                    .attr("d", d3.geoPath()
+                    .projection(projection))
+                // set the color of each country
+                .attr("fill", function (d) {
+                    d.total = data.get(d.properties.name) || 0;
+                    return colorScale(d.total);})
+                .style('stroke', 'transparent')
+                .attr('class', function(d){ return 'Country'})
+                .style('opacity', 1)
+                // to add interactive element of mouse hover
+                .on('mouseover', mouseover)
+                .on('mouseleave', mouseleave)
+                // adding tooltip
+                .append('title')
+                .text((d) => `${d.total} cases in ${d.properties.name}`)
+        }
+
+        // Create a diverging color scale
+        const x = d3.scaleLinear() 
+                .domain([2.6, 75.1]) 
+                .rangeRound([600, 860]);
+
+        // create svg for legend
+        const legend = svg.append("g") 
+                .attr("id", "legend");
+
+        // create legend entry
+        const legend_entry = legend.selectAll("g.legend") 
+                .data(colorScale.range().map(function(d) { 
+                    d = colorScale.invertExtent(d); 
+                    if (d[0] == null) d[0] = x.domain()[0]; 
+                    if (d[1] == null) d[1] = x.domain()[1]; 
+                    return d; 
+                })) 
+                .enter().append("g") 
+                .attr("class", "legend_entry");
+
+        const ls_w = 20, ls_h = 20;
+
+        legend_entry.append("rect") 
+                .attr("x", 150) 
+                .attr("y", function(d, i) { 
+                    return height - (i * ls_h) - 2 * ls_h - 100; 
+                }) 
+                .attr("width", ls_w) 
+                .attr("height", ls_h) 
+                .style("fill", function(d) { 
+                    return colorScale(d[0]); 
+                }) 
+                .style("opacity", 0.8);
+
+        legend_entry.append("text") 
+                .attr("x", 180) 
+                .attr("y", function(d, i) { 
+                    return height - (i * ls_h)- ls_h - 105; 
+                }) 
+                .text(function(d, i) { 
+                    if (i === 0) return "< " + d[1]; 
+                    if (d[1] < d[0]) return d[0]; 
+                    return d[0] + " - " + d[1] ; 
+                });
+
+        legend.append("text")
+                .attr("x", width/3 + 99)
+                .attr("y", 30).text("Monkeypox Cases (Count)");
+    </script>
+</body>
+</html>

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <script src="https://d3js.org/d3.v4.js"></script>
+</head>
+<body>
+    <div id="my_dataviz"></div>
+
+    <script>
+        var margin = {top: 30, right: 30, bottom: 70, left: 60},
+        width = 460 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
+
+        var svg = d3.select("#my_dataviz")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform",
+                    "translate (" + margin.left + "," + margin.top + ") ");
+        
+                d3.csv("electronics.csv", function(data) {
+                    // x axis
+                    var x = d3.scaleBand() 
+                        .range([ 0, width ]) 
+                        .domain(data.map(function(d) { return d.Product; })) 
+                        .padding(0.2); 
+                    svg.append("g") 
+                        .attr("transform", "translate(0," + height + ")") 
+                        .call(d3.axisBottom(x)) 
+                        .selectAll("text") 
+                        .attr("transform", "translate(-10,0)rotate(-45)") 
+                        .style("text-anchor", "end");
+                    
+                    //y axis
+                    var y = d3.scaleLinear() 
+                        .domain([0, 30]) 
+                        .range([ height, 0]); 
+                    svg.append("g") 
+                        .call(d3.axisLeft(y));
+
+                    // x axis label
+                    svg.append("text")
+                        .style("text-anchor", "middle")
+                        .attr("transform","translate(" + (width/2) + " ," +
+                            (height + margin.top + 40) + ")")
+                        .text("Product");
+
+                    // y axis label
+                    svg.append("text")
+                        .style("text-anchor", "end")
+                        .attr("transform", "rotate(-90)")
+                        .attr("y", -margin.left + 20)
+                        .attr("x", -margin.top)
+                        .text("Number of Unit");
+
+                    
+                    //add bars
+                    svg.selectAll("mybar") 
+                        .data(data) 
+                        .enter() 
+                        .append("rect") 
+                        .attr("x", function(d) { return x(d.Product); }) 
+                        .attr("y", function(d) { return y(d.Unit); }) 
+                        .attr("width", x.bandwidth()) 
+                        .attr("height", function(d) { return height - y(d.Unit); }) 
+                        .attr("fill", " #0D1D74")
+                    
+                    // adding main title
+                    svg.append("text")
+                        .attr("x", (width/2))
+                        .attr("y", 0 - (margin.top/2))
+                        .attr("text-anchor", "middle")
+                        .text("Product Vs Unit");
+                    })
+       
+    </script>
+    <h2>Summary:</h2>
+    <p>Based on the graph above, there is a total of 5 products which are TV, washing machine, mobile, AC and refrigerator.<br>
+        Mobile has the highest number of unit with 28 units. 
+        Out of the 5 products, AC has the lowest number of unit with only 15 units.<br>
+    </p>
+</body>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!--Nur Sarah Mohamad Suhaimi 19000422-->
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style> /* set the CSS */ 
+ 
+        .line { 
+          fill: none; 
+          stroke: red; 
+          stroke-width: 2px; 
+        } 
+         
+        </style> 
+         
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+    <script>
+    // set the dimensions and margins of the graph 
+    var margin = {top: 20, right: 20, bottom: 40, left: 50}, 
+            width = 960 - margin.left - margin.right, 
+            height = 500 - margin.top - margin.bottom;
+
+    // parse the date / time 
+    var parseTime = d3.timeParse("%Y-%m-%d");
+
+    // set the ranges 
+    var x = d3.scaleTime().range([0, width]); 
+    var y = d3.scaleLinear().range([height, 0]);
+
+    // define the 1st line 
+    var valueline = d3.line() 
+        .x(function(d) { return x(d.date); }) 
+        .y(function(d) { return y(d.Apple); });
+
+    // define the 2nd line , domain is about the data
+    var valueline2 = d3.line() 
+        .x(function(d) { return x(d.date); }) 
+        .y(function(d) { return y(d.Google); });
+
+    // define the rest of the line , domain is about the data
+    var valueline3 = d3.line()
+        .x(function(d){return x(d.date); })
+        .y(function(d){return y(d.Amazon); })
+
+    var valueline4 = d3.line()
+        .x(function(d) {return x(d.date); })
+        .y(function(d) {return y(d.Microsoft);})
+
+    var valueline5 = d3.line()
+        .x(function(d) {return x(d.date); })
+        .y(function(d) {return y(d.IBM);})
+
+    var valueline6 = d3.line()
+        .x(function(d) {return x(d.date); })
+        .y(function(d) {return y(d.Facebook);})
+
+    
+    var svg = d3.select("body").append("svg") 
+        .attr("width", width + margin.left + margin.right) 
+        .attr("height", height + margin.top + margin.bottom) 
+    .append("g") 
+        .attr("transform", 
+            "translate(" + margin.left + "," + margin.top + ")");
+
+
+    d3.csv("https://gist.githubusercontent.com/benlcollins/2d7fb36cd0c295c00882/raw/6776a4cf60432d1e325d09dc6cddcd5d62405d26/stock_data.csv").then(
+        function(data){
+
+            var subgroups = data.columns.slice(1) // for legend
+
+            // format the data 
+            data.forEach(function(d) { 
+                d.date = parseTime(d.date); 
+                d.Apple = +d.Apple; 
+                d.Google = +d.Google;
+                d.Amazon = +d.Amazon;
+                d.Microsoft = +d.Microsoft;
+                d.IBM = +d.IBM;
+                d.Facebook = +d.Facebook;
+            });
+            console.log(data)
+            // Scale the range of the data 
+            x.domain(d3.extent(data, function(d) { return d.date; })); 
+            y.domain([0, d3.max(data, function(d) { 
+            return Math.max(d.Apple, d.Google,d.Amazon,d.Microsoft,d.IBM,d.Facebook); })]);
+            
+            // Add the valueline path. 
+            svg.append("path") 
+                .data([data]) 
+                .attr("class", "line") 
+                .attr("d", valueline);
+
+            // Add the valueline2 path. 
+            svg.append("path") 
+                .data([data]) 
+                .attr("class", "line") 
+                .style("stroke", "RoyalBlue") 
+                .attr("d", valueline2);
+            
+            // Add the valueline3 path. 
+            svg.append("path") 
+                .data([data]) 
+                .attr("class", "line") 
+                .style("stroke", "green") 
+                .attr("d", valueline3);
+
+            // Add the valueline4 path. 
+            svg.append("path") 
+                .data([data]) 
+                .attr("class", "line") 
+                .style("stroke", "BlueViolet") 
+                .attr("d", valueline4);
+
+            // Add the valueline5 path. 
+            svg.append("path") 
+                .data([data]) 
+                .attr("class", "line") 
+                .style("stroke", "DarkTurquoise") 
+                .attr("d", valueline5);
+
+            // Add the valueline6 path. 
+            svg.append("path") 
+                .data([data]) 
+                .attr("class", "line") 
+                .style("stroke", "chocolate") 
+                .attr("d", valueline6);
+
+
+            // Add the X Axis 
+            svg.append("g") 
+                .attr("transform", "translate(0," + height + ")") 
+                .call(d3.axisBottom(x));
+
+            // Add the Y Axis 
+            svg.append("g") 
+                .call(d3.axisLeft(y));
+            
+            // Add X axis label:
+            svg.append("text")
+                .attr("text-anchor", "end")
+                .attr("x", width)
+                .attr("y", height + margin.top + 10)
+                .text("YEAR");
+
+            // Y axis label:
+            svg.append("text")
+                .attr("text-anchor", "end")
+                .attr("transform", "rotate(-90)")
+                .attr("y", -margin.left+13)
+                .attr("x", -margin.top+30)
+                .text("STOCK")
+
+            // adding legend
+            var keys = subgroups
+
+            var color = d3.scaleOrdinal()
+                .domain(keys)
+                .range(['red','RoyalBlue','green','BlueViolet','DarkTurquoise','chocolate']);
+
+            svg.selectAll("mydots")
+                .data(keys)
+                .enter()
+                .append("circle")
+                    .attr("cx", width - 800)
+                    .attr("cy", function(d,i){ return 10 + i*20})
+                    .attr("r", 7)
+                    .style("fill", function(d){ return color(d)})
+            
+            // Add one dot in the legend for each name.
+            svg.selectAll("mylabels")
+                .data(keys)
+                .enter()
+                .append("text")
+                    .attr("x", width - 800 + 10)
+                    .attr("y", function(d,i){ return 10 + i*20})
+                    .style("fill", function(d){ return color(d)})
+                    .text(function(d){ return d})
+                    .attr("text-anchor", "left")
+                    .style("alignment-baseline", "middle")
+        }
+    );
+    </script>
+    <h2>Summary:</h2>
+    <p>
+        &emsp;As an overview, we can clearly see that Google has dominated the stock market starting from year 2004 until 2015.<br>
+        &emsp;From the graph, Apple is gradually increased and managed to reach its highest point on year 2012 which makes Apple had a fierce competition with Google in the stock market.<br>
+        &emsp;As for Microsoft and IBM, they have a steady stock demand which can be seen from the graph. They have no sharp increase or decrease from year 2000 untill 2015.<br>
+        &emsp;Amazon is the third highest stock which is behind Google and Apple. However, it never faced a sudden big drop in their stock.<br>
+        &emsp;Lastly, Facebook has the lowest stock which is 0, from the others on 2000 untill 2011. But on 2012, it starts to have a slight increase in its stock.<br>
+        &emsp;Overall, Google is dominating the market followed by Apple and Amazon. Meanwhile, IBM has steady increase which made it at the fourth place.<br>
+        &emsp;Then, starting year 2000, Microsoft's stock is higher than Facebook but it only lasts until 2011. On 2012, Facebook's stock started to increase and its has higher stock than Microsoft.
+    </p>
+
+</body>
+</html>

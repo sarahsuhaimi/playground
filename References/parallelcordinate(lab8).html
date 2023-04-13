@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lab8-Lesson1</title>
+    <script src="https://d3js.org/d3.v4.js"></script>
+</head>
+<body>
+    <div id="my_dataviz"></div>
+    <script>
+        var margin = {top: 30, right: 10, bottom: 10, left: 0}, 
+            width = 500 - margin.left - margin.right, 
+            height = 400 - margin.top - margin.bottom;
+        
+        var svg = d3.select("#my_dataviz") 
+            .append("svg") 
+            .attr("width", width + margin.left + margin.right) 
+            .attr("height", height + margin.top + margin.bottom) 
+        .append("g") 
+            .attr("transform", 
+                    "translate(" + margin.left + "," + margin.top + ")");
+        
+        d3.csv("iris.csv", function(data) {
+            
+            dimensions = d3.keys(data[0]).filter(function(d) { return d != "Species" })
+            
+            var y = {} 
+            for (i in dimensions) { 
+                name = dimensions[i] 
+                y[name] = d3.scaleLinear() 
+                    .domain( d3.extent(data, function(d) { return +d[name]; }) ) 
+                    .range([height, 0]) 
+            }
+            
+            x = d3.scalePoint() 
+                .range([0, width]) 
+                .padding(1) 
+                .domain(dimensions);
+            
+            function path(d) { 
+                return d3.line()(dimensions.map(function(p) { 
+                    return [x(p), y[p](d[p])]; })); 
+            }
+
+            svg.selectAll("myPath") 
+                .data(data) 
+                .enter()
+                .append("path") 
+                .attr("d",  path) 
+                .style("fill", "none") 
+                .style("stroke", "#69b3a2") 
+                .style("opacity", 0.8)
+
+            svg.selectAll("myAxis") 
+                .data(dimensions)
+                .enter() 
+                .append("g") 
+            
+                // I translate the element to its right position on the x axis 
+                .attr("transform", function(d) { return "translate(" + x(d) + ")"; }) 
+                
+                // And build the axis with the call function 
+                .each(function(d) { d3.select(this).call(d3.axisLeft().scale(y[d])); }) 
+                
+                // Add axis title 
+                .append("text") 
+                .style("text-anchor", "middle") 
+                .attr("y", -9) 
+                .text(function(d) { return d; }) 
+                .style("fill", "black")
+
+        })
+    </script>
+</body>
+</html>
